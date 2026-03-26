@@ -1,7 +1,8 @@
 <template>
   <div class="feed-log-list">
     <h2>履歴 📖</h2>
-    <ul v-if="logs.length > 0">
+    <div v-if="error" class="error-msg">ログの取得に失敗しました</div>
+    <ul v-else-if="logs.length > 0">
       <li v-for="log in logs" :key="log.log_id">
         <span class="dot"></span>
         <div class="log-body">
@@ -20,6 +21,10 @@ defineProps({
   logs: {
     type: Array,
     default: () => []
+  },
+  error: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -51,6 +56,15 @@ h2 {
   text-align: center;
 }
 
+.error-msg {
+  text-align: center;
+  color: #CC3333;
+  font-size: 0.85rem;
+  padding: 0.5rem;
+  background: #FFF0F0;
+  border-radius: 8px;
+}
+
 ul {
   list-style: none;
   padding: 0;
@@ -64,9 +78,7 @@ li {
   border-bottom: 1px solid #F5F0EB;
 }
 
-li:last-child {
-  border-bottom: none;
-}
+li:last-child { border-bottom: none; }
 
 .dot {
   width: 8px;
@@ -85,22 +97,9 @@ li:last-child {
   flex: 1;
 }
 
-.log-time {
-  font-size: 0.75rem;
-  color: #BBB;
-  flex-shrink: 0;
-}
-
-.log-method {
-  font-size: 0.9rem;
-  font-weight: bold;
-  color: #444;
-}
-
-.log-note {
-  font-size: 0.8rem;
-  color: #888;
-}
+.log-time   { font-size: 0.75rem; color: #BBB; flex-shrink: 0; }
+.log-method { font-size: 0.9rem; font-weight: bold; color: #444; }
+.log-note   { font-size: 0.8rem; color: #888; }
 
 .empty {
   text-align: center;

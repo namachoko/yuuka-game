@@ -24,3 +24,8 @@ CREATE TABLE feed_log (
 -- 初期ステータスを1件登録（満腹100）
 INSERT INTO yuuka_status (fullness, last_fed_at)
 VALUES (100, CURRENT_TIMESTAMP);
+
+-- migration: streak追加 (2026-03-26)
+ALTER TABLE yuuka_status
+  ADD COLUMN IF NOT EXISTS streak INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS last_streak_date DATE;

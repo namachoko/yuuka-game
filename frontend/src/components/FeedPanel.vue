@@ -12,6 +12,7 @@
       >
         <span class="food-emoji">{{ food.emoji }}</span>
         <span class="food-name">{{ food.name }}</span>
+        <span class="food-restore">+{{ food.restore }}</span>
       </button>
     </div>
 
@@ -23,7 +24,9 @@
     />
 
     <transition name="fade">
-      <div v-if="feedMessage" class="feed-message">{{ feedMessage }}</div>
+      <div v-if="feedMessage" class="feed-message" :class="feedMessageClass">
+        {{ feedMessage }}
+      </div>
     </transition>
 
     <button class="feed-btn" @click="feed" :disabled="!method || loading">
@@ -36,34 +39,40 @@
 import { ref } from 'vue'
 import axios from 'axios'
 
+const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:3001'
+
 const emit = defineEmits(['feedSuccess'])
 
 const foods = [
-  { name: '豚バラ',     emoji: '🥩' },
-  { name: '家系ラーメン', emoji: '🍜' },
-  { name: 'ビール',     emoji: '🍺' },
+  { name: '豚バラ',      emoji: '🥩', restore: 40 },
+  { name: '家系ラーメン', emoji: '🍜', restore: 60 },
+  { name: 'ビール',      emoji: '🍺', restore: 20 },
 ]
 
 const method = ref('')
 const note = ref('')
 const loading = ref(false)
 const feedMessage = ref('')
+const feedMessageClass = ref('')
 
 const feed = async () => {
   loading.value = true
   feedMessage.value = ''
   try {
-    await axios.post('http://localhost:3001/feed', {
+    const res = await axios.post(`${API_URL}/feed`, {
       method: method.value,
       note: note.value,
     })
-    feedMessage.value = `ゆうかちゃん、${method.value} を食べてくれた！ 😊`
+    const restore = res.data.restore
+    feedMessage.value = `${method.value} をあげた！満腹度 +${restore} 💕`
+    feedMessageClass.value = 'success'
     method.value = ''
     note.value = ''
     emit('feedSuccess')
   } catch (err) {
     console.error('❌ Error feeding:', err)
-    feedMessage.value = 'エラーが発生しました…'
+    feedMessage.value = 'エラーが発生しました。バックエンドを確認してください。'
+    feedMessageClass.value = 'error'
   } finally {
     loading.value = false
   }
@@ -99,15 +108,13 @@ h2 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.6rem 1rem;
+  gap: 0.2rem;
+  padding: 0.6rem 0.9rem;
   border: 2px solid #EEE;
   border-radius: 16px;
   background: #FAFAFA;
   cursor: pointer;
   transition: all 0.15s ease;
-  font-size: 0.85rem;
-  color: #555;
   min-width: 80px;
 }
 
@@ -119,12 +126,23 @@ h2 {
 .food-btn.selected {
   border-color: #FF7A30;
   background: #FFF2E5;
-  color: #FF7A30;
-  font-weight: bold;
 }
 
-.food-emoji {
-  font-size: 1.5rem;
+.food-emoji { font-size: 1.5rem; }
+.food-name  { font-size: 0.8rem; color: #555; }
+
+.food-restore {
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #FF7A30;
+  background: #FFE8D6;
+  border-radius: 8px;
+  padding: 0.1rem 0.4rem;
+}
+
+.food-btn.selected .food-restore {
+  background: #FF7A30;
+  color: white;
 }
 
 .note-input {
@@ -139,19 +157,25 @@ h2 {
   font-family: inherit;
 }
 
-.note-input:focus {
-  border-color: #FFB347;
-}
+.note-input:focus { border-color: #FFB347; }
 
 .feed-message {
   text-align: center;
   font-size: 0.88rem;
-  color: #FF7A30;
   font-weight: bold;
   margin-bottom: 0.8rem;
   padding: 0.5rem;
-  background: #FFF4E0;
   border-radius: 10px;
+}
+
+.feed-message.success {
+  color: #FF7A30;
+  background: #FFF4E0;
+}
+
+.feed-message.error {
+  color: #CC3333;
+  background: #FFF0F0;
 }
 
 .feed-btn {

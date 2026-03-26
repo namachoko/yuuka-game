@@ -47,6 +47,8 @@ node_modules/
 .env
 .env.*
 !.env.example
+# フロントエンドの公開用.envは除外しない（シークレットなし）
+!frontend/.env
 
 # Build output
 dist

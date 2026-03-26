@@ -1,8 +1,21 @@
 <template>
   <div class="status-panel">
+    <div v-if="error" class="error-banner">
+      接続エラー。バックエンドが起動しているか確認してください。
+    </div>
+
     <div class="character-area">
       <div class="speech-bubble">{{ speechText }}</div>
-      <img src="./yuuka.png" class="yuuka-img" alt="ゆうかちゃん" />
+      <img
+        src="./yuuka.png"
+        class="yuuka-img"
+        :class="hungerClass"
+        alt="ゆうかちゃん"
+      />
+    </div>
+
+    <div v-if="status?.streak > 0" class="streak-badge">
+      {{ streakEmoji }} {{ status.streak }}日連続ごはん中！
     </div>
 
     <div class="fullness-section">
@@ -24,14 +37,19 @@
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 
+const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:3001'
+
 const status = ref(null)
+const error = ref(false)
 
 const fetchStatus = async () => {
   try {
-    const res = await axios.get('http://localhost:3001/status')
+    const res = await axios.get(`${API_URL}/status`)
     status.value = res.data
+    error.value = false
   } catch (err) {
     console.error('❌ Error fetching status:', err)
+    error.value = true
   }
 }
 
@@ -60,6 +78,20 @@ const barClass = computed(() => {
   return 'bar-low'
 })
 
+const hungerClass = computed(() => {
+  const f = status.value?.fullness ?? 100
+  if (f >= 60) return ''
+  if (f >= 30) return 'img-hungry'
+  return 'img-starving'
+})
+
+const streakEmoji = computed(() => {
+  const s = status.value?.streak ?? 0
+  if (s >= 7) return '🔥🔥🔥'
+  if (s >= 3) return '🔥🔥'
+  return '🔥'
+})
+
 defineExpose({ fetchStatus })
 </script>
 
@@ -72,11 +104,22 @@ defineExpose({ fetchStatus })
   box-shadow: 0 4px 20px rgba(255, 130, 50, 0.12);
 }
 
+.error-banner {
+  background: #FFF0F0;
+  border: 1px solid #FFAAAA;
+  color: #CC3333;
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
 .character-area {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 1.2rem;
+  margin-bottom: 0.8rem;
 }
 
 .speech-bubble {
@@ -118,6 +161,28 @@ defineExpose({ fetchStatus })
   height: 160px;
   object-fit: contain;
   border-radius: 16px;
+  transition: filter 0.6s ease;
+}
+
+.img-hungry {
+  filter: brightness(0.88) saturate(0.7);
+}
+
+.img-starving {
+  filter: grayscale(0.5) brightness(0.78);
+}
+
+.streak-badge {
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: bold;
+  color: #FF7A30;
+  background: #FFF4E0;
+  border-radius: 20px;
+  padding: 0.25rem 0.9rem;
+  display: inline-block;
+  margin: 0 auto 0.8rem;
+  width: 100%;
 }
 
 .fullness-section {

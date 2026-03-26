@@ -3,7 +3,7 @@
     <h1>💕 ゆうかちゃん</h1>
     <StatusPanel ref="statusPanel" />
     <FeedPanel @feedSuccess="handleFeed" />
-    <FeedLogList :logs="logs" />
+    <FeedLogList :logs="logs" :error="logsError" />
   </div>
 </template>
 
@@ -14,12 +14,21 @@ import StatusPanel from './components/StatusPanel.vue'
 import FeedPanel from './components/FeedPanel.vue'
 import FeedLogList from './components/FeedLogList.vue'
 
+const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:3001'
+
 const logs = ref([])
+const logsError = ref(false)
 const statusPanel = ref(null)
 
 const fetchLogs = async () => {
-  const res = await axios.get('http://localhost:3001/logs')
-  logs.value = res.data
+  try {
+    const res = await axios.get(`${API_URL}/logs`)
+    logs.value = res.data
+    logsError.value = false
+  } catch (err) {
+    console.error('❌ Error fetching logs:', err)
+    logsError.value = true
+  }
 }
 
 const handleFeed = () => {
