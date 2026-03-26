@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h1>ゆうかちゃんへの餌やり</h1>
+    <h1>💕 ゆうかちゃん</h1>
     <StatusPanel ref="statusPanel" />
     <FeedPanel @feedSuccess="handleFeed" />
     <FeedLogList :logs="logs" />
@@ -30,12 +30,32 @@ const handleFeed = () => {
 onMounted(fetchLogs)
 </script>
 
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  background: #FFF8F0;
+  font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  color: #444;
+}
+</style>
 
 <style scoped>
 #app {
-  max-width: 600px;
-  margin: 2rem auto;
-  font-family: sans-serif;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+h1 {
+  font-size: 1.5rem;
+  color: #FF7020;
+  font-weight: bold;
   text-align: center;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.08em;
 }
 </style>
